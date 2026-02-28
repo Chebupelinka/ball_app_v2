@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Создать пользователя</h2>
+<form method="post">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+        {{ form.username.label(class="form-label") }}
+        {{ form.username(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ form.full_name.label(class="form-label") }}
+        {{ form.full_name(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ form.contact.label(class="form-label") }}
+        {{ form.contact(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ form.role.label(class="form-label") }}
+        {{ form.role(class="form-select") }}
+    </div>
+    <div class="mb-3">
+        {{ form.password.label(class="form-label") }}
+        {{ form.password(class="form-control") }}
+        <small class="text-muted">Если оставить пустым, будет сгенерирован автоматически.</small>
+    </div>
+    <button type="submit" class="btn btn-primary">Создать</button>
+    <a href="{{ url_for('users_list') }}" class="btn btn-secondary">Отмена</a>
+</form>
+{% endblock %}

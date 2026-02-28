@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Добавить участника на мероприятие "{{ event.title }}"</h2>
+<form method="post">
+    <div class="mb-3">
+        <label for="username" class="form-label">Логин пользователя</label>
+        <input type="text" class="form-control" id="username" name="username" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Добавить</button>
+    <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-secondary">Отмена</a>
+</form>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="jumbotron">
+    <h1 class="display-4">Добро пожаловать в систему учёта репетиций!</h1>
+    <p class="lead">Здесь вы можете записываться на мероприятия, отмечать посещаемость и управлять событиями.</p>
+    <hr class="my-4">
+    <p>Перейдите к списку мероприятий, чтобы начать.</p>
+    <a class="btn btn-primary btn-lg" href="{{ url_for('events_list') }}" role="button">Мероприятия</a>
+</div>
+{% endblock %}

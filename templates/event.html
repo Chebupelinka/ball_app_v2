@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>{{ event.title }}</h2>
+<p><strong>Дата:</strong> {{ event.date.strftime('%d.%m.%Y %H:%M') }}</p>
+<p><strong>Место:</strong> {{ event.location }}</p>
+<p><strong>Описание:</strong> {{ event.description }}</p>
+<p><strong>Максимум участников:</strong> {{ event.max_participants if event.max_participants > 0 else 'без лимита' }}</p>
+<p><strong>Текущее количество записанных:</strong> {{ event.registrations|selectattr('status', 'in', ['registered', 'attended'])|list|length }}</p>
+
+{% if registration %}
+    {% if registration.status == 'registered' %}
+        <div class="alert alert-info">Вы записаны на это мероприятие. Ожидайте отметки организатора.</div>
+    {% elif registration.status == 'attended' %}
+        <div class="alert alert-success">Вы отмечены как посетивший(ая) это мероприятие.</div>
+    {% elif registration.status == 'cancelled' %}
+        <div class="alert alert-secondary">Ваша запись отменена.</div>
+    {% endif %}
+{% else %}
+    {% if event.max_participants == 0 or event.registrations|selectattr('status', 'in', ['registered', 'attended'])|list|length < event.max_participants %}
+        <form action="{{ url_for('event_register', event_id=event.id) }}" method="post">
+            <button type="submit" class="btn btn-success">Записаться</button>
+        </form>
+    {% else %}
+        <div class="alert alert-warning">Нет свободных мест. Обратитесь к организатору.</div>
+    {% endif %}
+{% endif %}
+
+<a href="{{ url_for('events_list') }}" class="btn btn-secondary">Назад к списку</a>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>{{ event.title }}</h2>
+<p><strong>Дата:</strong> {{ event.date.strftime('%d.%m.%Y %H:%M') }}</p>
+<p><strong>Место:</strong> {{ event.location }}</p>
+<p><strong>Описание:</strong> {{ event.description }}</p>
+<p><strong>Максимум участников:</strong> {{ event.max_participants if event.max_participants > 0 else 'без лимита' }}</p>
+
+<h3 class="mt-4">Зарегистрированные участники</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Участник</th>
+            <th>Статус</th>
+            <th>Добавлен организатором</th>
+            <th>Дата записи</th>
+            <th>Дата отметки</th>
+            <th>Отметил</th>
+            <th>Действие</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for reg in registrations %}
+        <tr>
+            <td>{{ reg.user.full_name }}</td>
+            <td>
+                {% if reg.status == 'registered' %}
+                    <span class="badge bg-warning">Записан</span>
+                {% elif reg.status == 'attended' %}
+                    <span class="badge bg-success">Отмечен</span>
+                {% elif reg.status == 'cancelled' %}
+                    <span class="badge bg-secondary">Отменён</span>
+                {% endif %}
+            </td>
+            <td>{% if reg.added_by_organizer %}Да{% else %}Нет{% endif %}</td>
+            <td>{{ reg.registered_at.strftime('%d.%m.%Y %H:%M') if reg.registered_at else '' }}</td>
+            <td>{{ reg.attended_at.strftime('%d.%m.%Y %H:%M') if reg.attended_at else '' }}</td>
+            <td>{{ reg.marker.full_name if reg.marker else '' }}</td>
+            <td>
+                {% if reg.status == 'registered' %}
+                    <a href="{{ url_for('mark_attendance', event_id=event.id, reg_id=reg.id) }}" class="btn btn-sm btn-success">Отметить</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('add_participant', event_id=event.id) }}" class="btn btn-primary">Добавить участника</a>
+<a href="{{ url_for('events_list') }}" class="btn btn-secondary">Назад к списку</a>
+{% endblock %}
