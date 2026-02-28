@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash
 from models import db, User, Event, Registration
 from forms import LoginForm, UserCreateForm, EventForm, RegisterForEventForm
 from datetime import datetime
-
+from wtforms.validators import Optional
 # Создаём приложение
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'you-will-never-guess'  # измените на случайную строку в продакшене
@@ -175,13 +175,6 @@ def event_delete(event_id):
     return redirect(url_for('events_list'))
 
 # --- Маршруты для всех пользователей (список мероприятий) ---
-
-@app.route('/events')
-@login_required
-def events_list():
-    # Все мероприятия
-    events = Event.query.order_by(Event.date).all()
-    return render_template('events.html', events=events)
 
 @app.route('/event/<int:event_id>')
 @login_required
