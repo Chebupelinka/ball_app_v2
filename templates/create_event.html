@@ -1,31 +1,81 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>{{ title }}</h2>
-<form method="post">
-    {{ form.hidden_tag() }}
-    <div class="mb-3">
-        {{ form.title.label(class="form-label") }}
-        {{ form.title(class="form-control") }}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h2>{{ title }}</h2>
+        <div class="card">
+            <div class="card-body">
+                <form method="post" id="eventForm">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.title.label(class="form-label") }}
+                        {{ form.title(class="form-control", placeholder="Введите название мероприятия") }}
+                        {% if form.title.errors %}
+                            <div class="text-danger">
+                                {% for error in form.title.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label") }}
+                        {{ form.description(class="form-control", rows=4, placeholder="Описание мероприятия (необязательно)") }}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.date.label(class="form-label") }}
+                            {{ form.date(class="form-control", type="datetime-local") }}
+                            <small class="text-muted">Формат: ГГГГ-ММ-ДД ЧЧ:ММ</small>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            {{ form.location.label(class="form-label") }}
+                            {{ form.location(class="form-control", placeholder="Место проведения") }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.max_participants.label(class="form-label") }}
+                        {{ form.max_participants(class="form-control", type="number", min="0", value="0") }}
+                        <small class="text-muted">0 - без ограничений</small>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary">
+                            {% if 'Создать' in title %}
+                                Создать мероприятие
+                            {% else %}
+                                Сохранить изменения
+                            {% endif %}
+                        </button>
+                        <a href="{{ url_for('events_list') }}" class="btn btn-secondary">Отмена</a>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-    <div class="mb-3">
-        {{ form.description.label(class="form-label") }}
-        {{ form.description(class="form-control", rows=3) }}
-    </div>
-    <div class="mb-3">
-        {{ form.date.label(class="form-label") }}
-        {{ form.date(class="form-control", type="datetime-local") }}
-        <small class="text-muted">Формат: ГГГГ-ММ-ДД ЧЧ:ММ</small>
-    </div>
-    <div class="mb-3">
-        {{ form.location.label(class="form-label") }}
-        {{ form.location(class="form-control") }}
-    </div>
-    <div class="mb-3">
-        {{ form.max_participants.label(class="form-label") }}
-        {{ form.max_participants(class="form-control") }}
-    </div>
-    <button type="submit" class="btn btn-primary">Сохранить</button>
-    <a href="{{ url_for('events_list') }}" class="btn btn-secondary">Отмена</a>
-</form>
+</div>
+
+<script>
+// Дополнительная валидация на стороне клиента
+document.getElementById('eventForm').addEventListener('submit', function(e) {
+    const dateInput = document.querySelector('input[type="datetime-local"]');
+    if (dateInput.value) {
+        const selectedDate = new Date(dateInput.value);
+        const now = new Date();
+        if (selectedDate < now) {
+            if (!confirm('Вы выбрали дату в прошлом. Продолжить?')) {
+                e.preventDefault();
+            }
+        }
+    }
+});
+</script>
 {% endblock %}

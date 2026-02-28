@@ -2,6 +2,35 @@
 
 {% block content %}
 <h2>Мероприятия</h2>
+
+<!-- Фильтры и поиск -->
+<div class="row mb-3">
+    <div class="col-md-8">
+        <form method="get" class="row g-2">
+            <div class="col-auto">
+                <select name="filter" class="form-select">
+                    <option value="all" {% if filter_type == 'all' %}selected{% endif %}>Все мероприятия</option>
+                    <option value="upcoming" {% if filter_type == 'upcoming' %}selected{% endif %}>Предстоящие</option>
+                    <option value="past" {% if filter_type == 'past' %}selected{% endif %}>Прошедшие</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <input type="text" name="search" class="form-control" placeholder="Поиск по названию" value="{{ search or '' }}">
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Применить</button>
+                <a href="{{ url_for('events_list') }}" class="btn btn-secondary">Сбросить</a>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-4 text-end">
+        {% if current_user.is_admin() %}
+        <a href="{{ url_for('event_create') }}" class="btn btn-success">Создать мероприятие</a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Таблица мероприятий -->
 <table class="table table-striped">
     <thead>
         <tr>
@@ -26,9 +55,13 @@
                 <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-sm btn-info">Просмотр</a>
                 {% if current_user.is_admin() %}
                     <a href="{{ url_for('event_edit', event_id=event.id) }}" class="btn btn-sm btn-warning">Редактировать</a>
-                    <a href="{{ url_for('event_delete', event_id=event.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Удалить мероприятие?')">Удалить</a>
+                    <a href="{{ url_for('event_delete', event_id=event.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Удалить мероприятие? Все записи участников будут удалены.')">Удалить</a>
                 {% endif %}
             </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5" class="text-center">Мероприятий не найдено</td>
         </tr>
         {% endfor %}
     </tbody>

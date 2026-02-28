@@ -203,6 +203,12 @@ def event_detail(event_id):
 @login_required
 def event_register(event_id):
     event = Event.query.get_or_404(event_id)
+
+    # Проверяем, не прошло ли уже мероприятие
+    if event.date < datetime.utcnow():
+        flash('Нельзя записаться на прошедшее мероприятие.', 'danger')
+        return redirect(url_for('event_detail', event_id=event.id))
+
     # Проверяем, не записан ли уже
     existing = Registration.query.filter_by(user_id=current_user.id, event_id=event.id).first()
     if existing:
@@ -221,8 +227,6 @@ def event_register(event_id):
     db.session.commit()
     flash('Вы успешно записаны на мероприятие.', 'success')
     return redirect(url_for('event_detail', event_id=event.id))
-
-# --- Организатор: отметка участников ---
 
 @app.route('/event/<int:event_id>/mark/<int:reg_id>')
 @login_required
@@ -272,6 +276,79 @@ def add_participant(event_id):
         return redirect(url_for('event_detail', event_id=event_id))
 
     return render_template('add_participant.html', event=event)
+
+
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    form = UserCreateForm(obj=current_user)
+    # Убираем поле роли и логина для редактирования (логин менять нельзя)
+    del form.role
+    del form.username
+    # Пароль делаем необязательным для заполнения
+    form.password.validators = [Optional()]
+
+    if form.validate_on_submit():
+        current_user.full_name = form.full_name.data
+        current_user.contact = form.contact.data
+        if form.password.data:  # если ввели новый пароль
+            current_user.set_password(form.password.data)
+        db.session.commit()
+        flash('Профиль обновлён.', 'success')
+        return redirect(url_for('profile'))
+
+    return render_template('profile.html', form=form)
+
+
+@app.route('/profile/<int:user_id>')
+@login_required
+@admin_required
+def user_profile(user_id):
+    user = User.query.get_or_404(user_id)
+    return render_template('user_profile.html', user=user)
+
+
+@app.route('/generate_credentials/<int:user_id>')
+@login_required
+@admin_required
+def generate_credentials(user_id):
+    user = User.query.get_or_404(user_id)
+    import secrets
+    import string
+
+    # Генерируем новый пароль (8 символов, буквы и цифры)
+    alphabet = string.ascii_letters + string.digits
+    new_password = ''.join(secrets.choice(alphabet) for _ in range(8))
+
+    user.set_password(new_password)
+    db.session.commit()
+
+    flash(f'Для пользователя {user.full_name} сгенерирован новый пароль: {new_password}', 'success')
+    return redirect(url_for('user_profile', user_id=user.id))
+
+
+@app.route('/events')
+@login_required
+def events_list():
+    # Получаем параметры фильтрации из запроса
+    filter_type = request.args.get('filter', 'all')  # all, upcoming, past
+    search = request.args.get('search', '')
+
+    query = Event.query
+
+    # Фильтр по дате
+    now = datetime.utcnow()
+    if filter_type == 'upcoming':
+        query = query.filter(Event.date >= now)
+    elif filter_type == 'past':
+        query = query.filter(Event.date < now)
+
+    # Поиск по названию
+    if search:
+        query = query.filter(Event.title.ilike(f'%{search}%'))
+
+    events = query.order_by(Event.date).all()
+    return render_template('events.html', events=events, filter_type=filter_type, search=search)
 
 # --- Запуск ---
 if __name__ == '__main__':

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <h2>Профиль пользователя</h2>
+        <div class="card">
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th>Логин:</th>
+                        <td>{{ user.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>Полное имя:</th>
+                        <td>{{ user.full_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Роль:</th>
+                        <td>
+                            <span class="badge {% if user.role == 'admin' %}bg-danger{% elif user.role == 'organizer' %}bg-warning{% else %}bg-info{% endif %}">
+                                {{ user.role }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Контакт:</th>
+                        <td>{{ user.contact or 'не указан' }}</td>
+                    </tr>
+                </table>
+
+                {% if current_user.is_admin() %}
+                <hr>
+                <h5>Действия администратора</h5>
+                <a href="{{ url_for('generate_credentials', user_id=user.id) }}" class="btn btn-warning" onclick="return confirm('Сгенерировать новый пароль? Старый пароль перестанет работать.')">
+                    Сгенерировать новый пароль
+                </a>
+                {% endif %}
+
+                <hr>
+                <a href="{{ url_for('users_list') }}" class="btn btn-secondary">Назад к списку</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

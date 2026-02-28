@@ -15,8 +15,9 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
+                    <!-- В разделе для авторизованных пользователей добавьте: -->
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('events_list') }}">Мероприятия</a>
+                        <a class="nav-link" href="{{ url_for('profile') }}">Профиль</a>
                     </li>
                     {% if current_user.is_authenticated and current_user.is_admin() %}
                     <li class="nav-item">
